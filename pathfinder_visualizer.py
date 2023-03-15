@@ -1,6 +1,7 @@
 from __future__ import annotations
 import pygame
-import Astar
+# import Astar
+import Dijkstra
 
 # Set up pygame
 WIN_WIDTH = 800
@@ -197,7 +198,5 @@ def run(algorithm: callable[callable, Grid, Node, Node]) -> None:
     pygame.quit()
 
 
-
-
 if __name__ == "__main__":
-    run(Astar.algorithm)
+    run(Dijkstra.algorithm)

@@ -1,7 +1,6 @@
 from queue import PriorityQueue
 import pygame
 from pathfinder_visualizer import Grid, Node
-from time import sleep
 
 
 class AstarNode:
