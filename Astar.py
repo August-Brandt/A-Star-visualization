@@ -1,21 +1,21 @@
 from queue import PriorityQueue
 import pygame
+from pathfinder_visualizer import Grid, Node
 
-
-def h(p1, p2):
+def h(p1: int, p2: int) -> int: # Calculate the distance from current point to end point. Used as the heuristic for algorithm
     x1, y1 = p1
     x2, y2 = p2
     return abs(x1 - x2) + abs(y1 - y2)
 
 
-def reconstruct_path(came_from, current, draw):
+def reconstruct_path(came_from: dict[Node, Node], current: Node, draw: callable) -> None:
     while current in came_from:
         current = came_from[current]
         current.makePath()
         draw()
 
 
-def algorithm(draw, grid, start, end):
+def algorithm(draw: callable, grid: Grid, start: int, end: int) -> None:
     count = 0
     open_set = PriorityQueue()
     open_set.put((0, count, start))
@@ -39,7 +39,7 @@ def algorithm(draw, grid, start, end):
             reconstruct_path(came_from, end, draw)
             end.makeEnd()
             start.makeStart()
-            return True     # make math
+            return
 
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
@@ -58,5 +58,3 @@ def algorithm(draw, grid, start, end):
 
         if current != start:
             current.makeClosed()
-
-    return False

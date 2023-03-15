@@ -1,6 +1,6 @@
+from __future__ import annotations
 import pygame
 import Astar
-
 
 # Set up pygame
 WIN_WIDTH = 800
@@ -23,7 +23,7 @@ COLORS = {
 
 
 class Node:
-    def __init__(self, row, col, width, total_rows):
+    def __init__(self, row: int, col: int, width: int, total_rows: int) -> None:
         self.row = row
         self.col = col
         self.width = width
@@ -31,58 +31,58 @@ class Node:
         self.type = None
         self.total_rows = total_rows
 
-    def getPos(self):
+    def getPos(self) -> tuple[int, int]:
         return self.row, self.col
 
-    def isClosed(self):
+    def isClosed(self) -> bool:
         return self.type == "closed"
 
-    def isOpen(self):
+    def isOpen(self) -> bool:
         return self.type == "open"
 
-    def isBarrier(self):
+    def isBarrier(self) -> bool:
         return self.type == "barrier"
 
-    def isStart(self):
+    def isStart(self) -> bool:
         return self.type == "start"
 
-    def isEnd(self):
+    def isEnd(self) -> bool:
         return self.type == "end"
 
-    def reset(self):
+    def reset(self) -> None:
         self.color = COLORS["WHITE"]
         self.type = None
 
-    def makeClosed(self):
+    def makeClosed(self) -> None:
         self.color = COLORS["RED"]
         self.type = "closed"
 
-    def makeOpen(self):
+    def makeOpen(self) -> None:
         self.color = COLORS["GREEN"]
         self.type = "open"
 
-    def makeBarrier(self):
+    def makeBarrier(self) -> None:
         self.color = COLORS["BLACK"]
         self.type = "barrier"
 
-    def makeStart(self):
+    def makeStart(self) -> None:
         self.color = COLORS["ORANGE"]
         self.type = "start"
 
-    def makeEnd(self):
+    def makeEnd(self) -> None:
         self.color = COLORS["TURQUOISE"]
         self.type = "end"
 
-    def makePath(self):
+    def makePath(self) -> None:
         self.color = COLORS["PURPLE"]
         self.type = "path"
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
         x = self.col * self.width
         y = self.row * self.width
         pygame.draw.rect(surface, self.color, (x, y, self.width, self.width))
 
-    def update_neighbors(self, grid, total_rows):
+    def update_neighbors(self, grid: list[list[Node]], total_rows: int) -> None:
         """
         Add nodes to a list if they are neighbouring and not barriers.
         Used to see what nodes can be checked from that current node (the edges)
@@ -99,25 +99,25 @@ class Node:
 
 
 class Grid:
-    def __init__(self, rows, width):
+    def __init__(self, rows: int, width: int) -> None:
         self.rows = rows
         self.width = width
         self.cell_size = width // rows
         self.makeGrid()
     
-    def makeGrid(self):
+    def makeGrid(self) -> None:
         self.grid = [[Node(i, j, self.cell_size, self.rows) for j in range(self.rows)] for i in range(self.rows)]
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
         for i in range(self.rows):
             pygame.draw.line(surface, COLORS["GREY"], (0, i * self.cell_size), (self.width, i * self.cell_size))
             pygame.draw.line(surface, COLORS["GREY"], (i * self.cell_size, 0), (i * self.cell_size, self.width))
 
-    def getGrid(self):
+    def getGrid(self) -> list[list[Node]]:
         return self.grid
 
 
-def draw(surface, grid, rows, width):
+def draw(surface: pygame.Surface, grid: Grid) -> None:
     surface.fill(COLORS["WHITE"])
 
     for row in grid.getGrid():
@@ -128,7 +128,7 @@ def draw(surface, grid, rows, width):
 
     pygame.display.update()
 
-def getClickedPos(pos, rows, width):
+def getClickedPos(pos: tuple[int, int], rows: int, width: int) -> tuple[int, int]:
     cell_size = width // rows
     x, y = pos
 
@@ -137,7 +137,7 @@ def getClickedPos(pos, rows, width):
 
     return row, col
 
-def run(algorithm):
+def run(algorithm: callable[callable, Grid, Node, Node]) -> None:
     ROWS = 50
     grid = Grid(ROWS, WIN_WIDTH)
     width = WIN_WIDTH
@@ -152,11 +152,13 @@ def run(algorithm):
     
     while run:
         clock.tick(60)
-        draw(surface, grid, ROWS, width)
+        draw(surface, grid)
         for event in pygame.event.get():
+            # Check if window is closed
             if event.type == pygame.QUIT:
                 run = False
 
+            # Take care of drawing
             if pygame.mouse.get_pressed()[0]:
                 pos = pygame.mouse.get_pos()
                 row, col = getClickedPos(pos, ROWS, width)
@@ -179,13 +181,14 @@ def run(algorithm):
                 if node == end:
                     end = None
             
+            # Run pathfinding algorithm
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and start and end:
                     for row in grid.getGrid():
                         for node in row:
                             node.update_neighbors(grid.getGrid(), ROWS)
 
-                    algorithm(lambda: draw(surface, grid, ROWS, width), grid, start, end)
+                    algorithm(lambda: draw(surface, grid), grid, start, end)
 
                 if event.key == pygame.K_c:
                     start = None
